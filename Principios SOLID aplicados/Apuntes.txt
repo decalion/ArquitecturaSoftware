@@ -1,0 +1,232 @@
+###QUE SON LOS PRINCIPIO SOLIID###
+	Principios o convenciones de diseño de Software
+	Ampliamente aceptados en la industria
+	Ayudan a hacer un código más mantenible y tolerante a cambios
+	Aplicables en términos de diseño de clases (micro-diseño), y también a nivel de arquitectura de software y estructura de [micro]servicios (macro-diseño)
+	Tenemos que romper con el rol de “Arquitecto de software”. Entender el diseño de software de calidad como una habilidad y no un rol
+	
+	S.O.L.I.D
+		S = SRP
+		O = OCP
+		L = LSP
+		I = ISP
+		D = DIP
+	
+	###SOLID vs STUPID###
+		Singleton:
+		Tight Coupling:
+			Acoplamiento entre clases que dificulta la mantenibilidad y tolerancia al cambio que proporciona la aplicación de principios SOLID
+		Untestability: 
+			Código difícil de testear. Derivado de no inyectar dependencias vía constructor nos vemos obligados al uso de costuras en nuestro código.
+		Premature Optimization: 
+			Anticiparnos a los requisitos de nuestro software desarrollando abstracciones innecesarias que añaden complejidad.
+		Indescriptive Naming: 
+			Nomenclatura indescriptiva tanto a nivel de clases, como variables o atributos. ¡Hablaremos más de esto en el curso de Clean Code!
+		Duplication: 
+			Duplicidad de código. Algo solucionable si aplicamos el Principio de Responsabilidad Única de SOLID e inyección de dependencias como veremos en este curso
+
+###DIGRAMA - UML###
+	###CASOS DE USO###
+		Se trata de un tipo de diagrama que permite visualizar las funcionalidades de nuestra aplicación. 
+		Esto mismo se traducirá después en nuestro código como casos de uso/application services
+		
+	###SECUENCIA###
+		Se trata de un diagrama con el que podremos ver el flujo de nuestra aplicación, 
+		representando cómo interaccionan las clases (comunicación entre objetos)
+	
+	###CLASES##
+		Este tipo de diagramas son muy populares y nos permiten ver no sólo los atributos y métodos de cada clase, 
+		sino también las diferentes relaciones de herencia, interfaces e implementaciones de éstas.
+		
+
+
+###Principio de Responsabilidad Única (SRP) ###
+	Concepto:
+		Una clase = Un concepto y responsabilidad
+		Una clase debería tener sólo 1 razón para cambiar
+	Cómo conseguirlo:
+		Clases pequeñas con objetivos acotados
+	Finalidad:
+		Alta cohesión y robustez
+		Permitir composición de clases (inyectar colaboradores)
+		Evitar duplicidad de código
+		
+
+###Principio de Abierto/Cerrado (OCP) ###
+	Concepto:
+		El Software debería estar abierto a extensión y cerrado a modificación.
+		Esto aplica tanto a nuestras clases internas, servicios, microservicios, casos de usos…
+	Cómo conseguirlo:
+		Evitando depender de implementaciones específicas, haciendo uso de clases abstractas o interfaces.
+	Finalidad:
+		Facilidad para añadir nuevos Casos de uso en nuestra aplicación.
+		
+	###Interfaces vs Abstract Class###
+		Beneficios de Interface:
+			No modifica el árbol de jerarquía
+			Permite implementar N Interfaces
+		Beneficios de Abstract Class:
+			Permite desarrollar el patrón Template Method[^1] empujando la lógica al modelo
+				Problema: Dificultad de trazar
+			Getters privados (Tell don’t ask)
+		
+		¿Cuándo usamos Interfaces?: Cuando vayamos a desacoplar entre capas
+		¿Cuándo usamos Abstract?: En determinados casos para Modelos de dominios
+
+
+###Principio de Substitucion Liskov (LSP) ###
+
+	Concepto:
+		Si S es un subtipo de T, instancias de T deberían poderse sustituir por instancias de S sin alterar las propiedades del programa
+		Es decir, al tener una jerarquía nos supone que estamos estableciendo un contrato en el padre, por lo que, garantizar que se mantiene dicho contrato en el hijo, nos permitirá que podamos sustituir al padre y la aplicación seguirá funcionando perfectamente 👌
+	Cómo:
+		El comportamiento de de las subclases debe respetar el contrato establecido en la superclase.
+	Finalidad:
+		Mantener correctitud funcional para poder aplicar OCP
+
+
+		
+###Principio de Segregación de Interfaces (ISP) ###
+
+	Concepto:
+		Ningún cliente debería verse forzado a depender de métodos que no usa
+	Cómo:
+		Definir contratos de interfaces basándonos en los clientes que las usan y no en las implementaciones que pudiéramos tener (Las interfaces pertenecen a los clientes)
+		Evitar Header Interfaces promoviendo Role Interfaces
+	Finalidad:
+		Alta cohesión y bajo acoplamiento estructural
+		
+	###Ejemplo Sencillo###
+
+		Queremos poder enviar notificaciones vía email, Slack, o fichero txt ¿Qué firma tendrá la interface? 📨
+			a) $notifier($content)
+			b) $notifier($slackChannel, $messageTitle, $messageContent, $messageStatus) ❌
+			c) $notifier($recieverEmail, $emailSubject, $emailContent) ❌
+			d) $notifier($destination, $subject, $content) ❌
+			e) $notifier($filename, $tag, $description) ❌
+
+		Podemos descartar que las opciones B, C y E fueran interfaces válidas, puesto que se estaría haciendo
+		Header Interface en base a la implementación (para Slack, email y fichero respectivamente).
+
+		En el caso de la opción D, podríamos considerarlo inválido dado que el tipo $destination no nos ofrece ninguna especificidad (no sabemos si es un email, un canal…).
+
+		Por último, en la opción A, sólo estaríamos enviando el contenido, por lo que las particularidades de cada uno de los tipos de notificación tendrían que venir dados en el constructor (dependiendo del caso de uso no siempre se podría).
+
+
+		Las interfaces pertenecen a los clientes y no a quienes las implementan
+		Diferencia: Nivel de abstracción de la implementación
+			a) Si sabemos destinatario en tiempo de compilación (parámetros por constructor)
+			d) Si no sabemos destinatario hasta tiempo de ejecución (perdemos el tipado)
+			f) Dos subscribers diferentes (email y slack) que leen de módulos…
+			
+
+
+### Principio de Inversión de Dependencias (DIP)###
+
+	Concepto:
+		Módulos de alto nivel no deberían depender de los de bajo nivel. Ambos deberían depender de abstracciones
+	Cómo:
+		Inyectar dependencias (parámetros recibidos en constructor)
+		Depender de las interfaces (contratos) de estas dependencias y no de implementaciones concretas
+		LSP como premisa
+	Finalidad:
+		Facilitar la modificación y substitución de implementaciones
+		Mejor testabilidad de clases
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
