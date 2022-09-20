@@ -135,7 +135,8 @@
 		
 
 
-
+### Proyectos para Practicar SOLID ###
+	https://kata-log.rocks/
 
 
 
