@@ -1,0 +1,202 @@
+###Que es la Arquitectura de Software###
+	Reglas autoimpuestas al definir como diseñamos software
+	
+	###Beneficio de Arquitectura Hexagonal###
+		Mantenibilidad
+		Cambiabilidad
+		Testing
+		Simplicidad
+	
+###Capas de la Arquitectura Hexagonal###
+	
+	###Dominio###
+		Conceptos que están en nuestro contexto (Usuario, Producto, Carrito, etc), 
+		y reglas de negocio que vienen determinadas en exclusiva por nosotros (servicios de dominio),
+	 
+	###Aplicacion###
+		La capa de aplicación es donde viven los casos de uso de nuestra aplicación 
+		(registrar usuario, publicar producto, añadir producto al carrito, etc).
+	
+	###Infraestructura###
+		Código que cambia en función de decisiones externas. 
+		En esta capa vivirán las implementaciones de las interfaces que definiremos a nivel de dominio. 
+		Es decir, nos apoyaremos en el DIP de SOLID para poder desacoplarnos de las dependencias externas.
+
+
+	###Regla de dependencia###
+		Esta regla nos dice que el código que viva en cada una de nuestras capas sólo deberá conocer las clases que se ubican en la capa inmediatamente siguiente. 
+		Entendemos el orden de las capas desde fuera hacia dentro del círculo: Infraestructura -> Aplicación -> Dominio.
+
+	###Puertos y adaptadores###
+		Ports:
+			Los puertos son las interfaces definidas en la capa de dominio para desacoplarnos de nuestra infraestructura. Ejemplo: UserRepository
+		
+		Adapters:
+			Los adaptadores son las implementaciones posibles de esos puertos. Estas implementaciones traducirán esos contratos 
+			definidos en la interfaz a la lógica necesaria a ejecutar en base a un determinado proveedor. 
+			Ejemplo: MySqlUserRepository
+	
+	###Testing###
+		Test unitarios: 
+			Capa de Aplicación y Dominio
+		Test de integración: 
+			Capa de Infraestructura
+		Test de Aceptación: 
+			Todas las capas
+
+
+###Patrón criteria/specification###
+	https://thinkinginobjects.com/2012/08/26/dont-use-dao-use-repository/
+
+
+
+###Servicios de infraestructura###
+	Aspectos a tener en cuenta:
+		Las particularidades de cada adaptador/implementación de nuestras interfaces las especificaremos a través de inyección vía constructor. 
+		
+			Ejemplos:
+				Conexión con base de datos en repositorios
+				Sender y credenciales SMTP en servicio de notificación vía email
+				Canal y API Key en servicio de notificación vía Slack
+
+		Evitaremos el acoplamiento estructural en nuestras interfaces no acoplando los contratos, lógica, o flujo de llamadas a conceptos relacionados 
+		con alguna de nuestras implementaciones.
+		Usaremos implementaciones fake de servicios como el de envío de email para ejecutar nuestros tests.
+
+
+
+###Servicios de Aplicación VS Servicios de Dominio###
+
+	###Servicios de Aplicación###
+		Son los puntos de entrada a nuestra aplicación. 
+		Los Controller
+		Representan de forma atómica un caso de uso de nuestro sistema. En caso de modificaciones del estado de nuestra aplicación:
+			Podrán hacer las de barrera transaccional con el sistema de persistencia.
+			Publicarán los eventos de dominio respectivos.
+		Coordinan las llamadas a los distintos elementos de nuestro sistema para ejecutar un determinado caso de uso.
+		Les llamaremos indistintamente Servicio de Aplicación como caso de uso.
+		
+	###Servicios de dominio###
+		Los servicios de domino representan una agrupación de lógica de negocio que podremos reutilizar desde múltiples Servicios de Aplicación.
+		Vamos a poner un ejemplo para poder explicarnos mejor. Tenemos dos casos de uso en nuestra aplicación:
+			Obtener un vídeo en base a su identificador
+			Modificar el título de un determinado vídeo
+		En ambos casos de uso, necesitaremos la lógica de negocio para:
+			Ir al repositorio de vídeos a buscar un vídeo determinado en base a su identificador
+			Lanzar una excepción de dominio tipo VideoNotFound en caso de no encontrar el vídeo. 
+			Importante destacar que quien lanza esta excepción, como comentamos en el vídeo, no es la implementación del repositorio.
+			Retornar el vídeo en caso de encontrarlo
+
+		Para evitar duplicar esta lógica de negocio en los 2 Servicios de Aplicación lo que solemos hacer es extraerla a un Servicio de Dominio que 
+		invocaremos desde ambos casos de uso.
+
+
+		Es importante destacar que los servicios de dominio en ningún caso publicarán los eventos de dominio que se puedan producir 
+		ni gestinonarán transacciones. Eso se lo dejamos al Application Service que nos invoca para evitar duplicidades 
+		ya que es realmente él quién establece la “atomicidad” del caso de uso.
+
+
+
+	###Servicio de Aplicación -> Servicio de Infraestructura###
+		Cuando interaccionamos con un servicio de infraestructura desde uno de aplicación, 
+		lo que hacemos como vimos en la lección anterior es hacer uso del Principio de Inversión de Dependencias.
+
+		Es decir, el Servicio de Aplicación recibe por constructor el colaborador de infraestructura que, 
+		para evitar acoplamiento, lo hace a través de una interface de dominio.
+
+
+		Esto es así para aislarnos de los posibles cambios por terceros en esas implementaciones, 
+		y poder falsear esos colaboradores a la hora de ejecutar nuestros tests
+		
+		
+	###Servicio de Aplicación -> Servicio de Dominio###
+		A la hora de invocar un Servicio de Dominio desde uno de Aplicación, 
+		nos encontramos una situación diferente y por lo tanto trataremos este caso de forma distinta.
+
+		Los servicios de dominio, por definición, sólo contendrán lógica de negocio. 
+		Con lo cuál, no necesitaremos desacoplarnos de ellos como sí necesitábamos desacoplarnos de los servicios de infraestructura.
+
+		Además, al no tocar entrada/salida, tampoco nos interesará inyectar una implementación diferente de nuestro servicio
+		de dominio durante la ejecución de nuestros tests.
+
+
+		Es más, nos interesará que nuestros tests pasen por el servicio de dominio a la hora de testear el caso de uso para así poder 
+		cubrirlo de forma indirecta.
+
+		Con lo cuál, los servicios de dominio no tendrán una interface por encima ya que es totalmente innecesaria. 
+		No aportaría más que complejidad a través del nivel de indirección adicional que suponen en nuestro sistema.
+
+
+###Value Objects###
+	Los Value Objects (VO) u “Objetos de Valor”, no son más que clases que se identifican por el valor que representan.
+	Por ejemplo, cuando hablamos de nuestras entidades de dominio como puede ser Video, éstas tienen un atributo que será el identificador. 
+	Por lo tanto, si cambia el título del vídeo, seguimos entendiendo que se trata del mismo vídeo ya que tiene el mismo identificador.
+	En cambio, los conceptos de dominio que modelemos usando el patrón VO, serán elementos como por ejemplo la URL de los vídeos. Con lo cuál,
+	si cambia su valor, ya no representará el mismo concepto. Por esto decimos que se identifican por el valor que contienen.
+	
+	¿Qué nos aporta modelar esos pequeños conceptos de dominio con VO?
+		Semántica de dominio: 
+			Tener nuestros propios tipos con conceptos de dominio como VideoUrl, UserRange, Rating, etc. 
+			nos ayudará a que el código sea más legible y a que nuestro código exprese mejor los conceptos de nuestro dominio.
+		Cohesión: 
+			Desde el momento en el que tenemos una clase para modelar las URLs de los vídeos, la lógica 
+			relacionada estará autocontenida en esta clase. De tal forma que la lógica está mucho más cerca de los datos que necesita. 
+			Esto redunda en los 2 beneficios que comentamos en el vídeo:
+		Evitar comprobaciones redundantes: 
+			Desde el momento en el que me llega algo de tipo VideoUrl, me puedo ahorrar todas las comprobaciones 
+			que podría llegar a tener duplicadas a lo largo de mi código al respecto. Es decir, en el momento de instanciación del VideoUrl 
+			es cuando validaremos que sea una URL válida, con lo cuál, podremos dar esto por hecho en el momento de recibir una instancia de la 
+			clase y evitar tener que comprobar si es null.
+		Imán de lógica: 
+			La primera vez que introducimos un determinado VO en nuestro sistema puede que no le veamos mucho sentido quizá, 
+			pero a medida que exploramos la aplicación seguro nos iremos encontrando con pequeñas porciones de lógica que,
+			por falta de no tener un lugar ideal donde ubicarlas, las hemos implementado en servicios o modelos que han engordado demasiado.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
