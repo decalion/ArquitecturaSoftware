@@ -1,0 +1,5 @@
+com\icaballero\shared\domain\DomainEvent.class
+com\icaballero\shared\domain\AggregateRoot.class
+com\icaballero\shared\domain\EventBus.class
+com\icaballero\shared\application\DomainEventSubscriber.class
+com\icaballero\shared\infrastructure\bus\ReactorEventBus.class

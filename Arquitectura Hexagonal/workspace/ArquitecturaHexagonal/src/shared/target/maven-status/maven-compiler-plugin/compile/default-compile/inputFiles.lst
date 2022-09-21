@@ -1,0 +1,5 @@
+D:\Cursos\Cursos git\ArquitecturaSoftware\Arquitectura Hexagonal\workspace\ArquitecturaHexagonal\src\shared\src\main\java\com\icaballero\shared\domain\EventBus.java
+D:\Cursos\Cursos git\ArquitecturaSoftware\Arquitectura Hexagonal\workspace\ArquitecturaHexagonal\src\shared\src\main\java\com\icaballero\shared\application\DomainEventSubscriber.java
+D:\Cursos\Cursos git\ArquitecturaSoftware\Arquitectura Hexagonal\workspace\ArquitecturaHexagonal\src\shared\src\main\java\com\icaballero\shared\domain\AggregateRoot.java
+D:\Cursos\Cursos git\ArquitecturaSoftware\Arquitectura Hexagonal\workspace\ArquitecturaHexagonal\src\shared\src\main\java\com\icaballero\shared\domain\DomainEvent.java
+D:\Cursos\Cursos git\ArquitecturaSoftware\Arquitectura Hexagonal\workspace\ArquitecturaHexagonal\src\shared\src\main\java\com\icaballero\shared\infrastructure\bus\ReactorEventBus.java

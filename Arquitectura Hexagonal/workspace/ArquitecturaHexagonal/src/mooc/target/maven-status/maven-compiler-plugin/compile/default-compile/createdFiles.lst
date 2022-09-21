@@ -1,0 +1,7 @@
+com\icaballero\mooc\notification\application\create\SendPushToSubscribersOnVideoPublished.class
+com\icaballero\mooc\video\domain\VideoPublished.class
+com\icaballero\mooc\video\domain\VideoDescription.class
+com\icaballero\mooc\video\domain\Video.class
+com\icaballero\mooc\video\domain\VideoTitle.class
+com\icaballero\mooc\video\application\publish\VideoPublisher.class
+com\icaballero\mooc\video\infrastructure\VideoPublisherCliController.class
