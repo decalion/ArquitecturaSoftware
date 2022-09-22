@@ -1,0 +1,13 @@
+###Introduccion a CQRS###
+	Es un patron de diseño a alto nivel que nos sirve para definir una arquitectura en nuestra aplicacion.
+	Rendimiento.
+	Carga de rendimientos
+	
+###Qué es un Command###
+	En CQRS, un Command representa la intención de realizar una operación en nuestro sistema que acabe modificando el estado de tal.
+	
+	Ejemplo
+		Fuera de la teoría, el Command en sí no es más que un DTO (objeto de transferencia de datos) el cuál representa la acción que queremos hacer.
+		
+###Qué es una Query (en CQRS)###
+	En CQRS, una Query representa la intención de pedir unos datos a nuestro sistema sin que ello acabe alterando el estado de tal.
